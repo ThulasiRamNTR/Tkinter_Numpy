@@ -265,7 +265,7 @@ class Calculator(tk.Tk):
     def gpa_calculation(self):
 
         self.grade_credits = np.array([self.grade_credit_value[self.subject_entry_grade[index].get()] for index in range(len(self.subject_entry_grade))])
-        
+
         self.cgp_product_sum = sum(self.grade_credits * self.subject_credit)
         self.credit_sum = round(sum(self.subject_credit), 3)
 
@@ -292,8 +292,6 @@ class Calculator(tk.Tk):
         for sem,name in self.semesters:
             self.gpa_var = tk.DoubleVar()
             self.semester_gpa_entry.append(self.gpa_var)
-            if sem > self.semester.get():
-                break
 
             self.semester_label = tk.Label(self.display_sem_frame, text = name)
             self.gpa_entry = tk.Entry(self.display_sem_frame, textvariable = self.semester_gpa_entry[index])
@@ -302,6 +300,9 @@ class Calculator(tk.Tk):
             self.semester_entry.append(self.current_semester_entry)
 
             index += 1
+
+            if sem >= self.semester.get():
+                break
 
         index = 0
         for sem, gpa_entry in self.semester_entry:
@@ -318,17 +319,19 @@ class Calculator(tk.Tk):
 
 
 
-    def cgpa_calculation(self): #Doubt persists
+    def cgpa_calculation(self):
 
-        self.gpa_total = 0
-        self.credit_total = 0
+        self.sem_gpa_total = 0 #Calculates the sum of (subject_grade_value * subject_credit) for a particular semester
+        self.credit_value_total = 0 #Sum of sem_gpa_total of all semesters
+        self.credit_total = 0 #Sum of subject_credit of all subjects in all semesters
         for current_sem in range(self.semester.get()):
             self.credit_total += sum([credit for subject,credit in self.regulation_departments_semester[self.regulation.get()][self.department.get()][current_sem+1]])
 
-        for index in range(len(self.semester_gpa_entry)):
-            self.gpa_total += self.semester_gpa_entry[index].get()
+        for current_sem in range(len(self.semester_gpa_entry)):
+            self.sem_gpa_total = self.semester_gpa_entry[current_sem].get() * sum([credit for subject,credit in self.regulation_departments_semester[self.regulation.get()][self.department.get()][current_sem+1]])
+            self.credit_value_total += self.sem_gpa_total
 
-        self.cgpa = round(self.gpa_total / self.credit_total, 3)
+        self.cgpa = round(self.credit_value_total / self.credit_total, 3)
 
         msg.showinfo("CGPA", self.cgpa)
 
